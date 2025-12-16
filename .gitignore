@@ -10,3 +10,5 @@ vars.yml
 
 # System files
 .DS_Store
+
+.vscode
