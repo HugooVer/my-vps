@@ -1,0 +1,12 @@
+# Secret files
+vars.yml
+*.env
+.env
+
+# Temporary Ansible files
+*.retry
+*.pyc
+.cache/
+
+# System files
+.DS_Store
