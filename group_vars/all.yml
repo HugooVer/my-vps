@@ -1,0 +1,7 @@
+---
+
+# SSH Configuration
+ansible_user: ubuntu
+ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+
+domain_name: "hugo-ver.dev"

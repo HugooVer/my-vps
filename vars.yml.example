@@ -1,0 +1,8 @@
+---
+
+# ----------------------------------------------------------------
+# TEMPLATE FOR SECRETS
+# Copy this file to 'vars.yml' and fill in your real values.
+# ----------------------------------------------------------------
+
+email_contact: "my@email.com"

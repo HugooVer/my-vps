@@ -1,0 +1,126 @@
+---
+
+- name: Update apt cache and upgrade packages
+  ansible.builtin.apt:
+    update_cache: true
+    upgrade: dist
+  register: common_apt_result
+  until: common_apt_result is success
+  retries: 10
+  delay: 30
+
+- name: Install essential packages
+  ansible.builtin.apt:
+    name:
+      - curl
+      - git
+      - htop
+      - iptables-persistent
+    state: present
+
+# --- DOCKER INSTALLATION ---
+
+- name: Install required packages for Docker
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - gnupg
+    state: present
+
+- name: Create directory for Docker GPG key
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Download Docker's official GPG key
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644'
+
+- name: Add Docker repository to Apt sources
+  ansible.builtin.apt_repository:
+    repo: >-
+          deb [arch={{ ansible_architecture | replace('x86_64', 'amd64') | replace('aarch64', 'arm64') }}
+          signed-by=/etc/apt/keyrings/docker.asc]
+          https://download.docker.com/linux/ubuntu
+          {{ ansible_distribution_release }} stable
+    state: present
+    filename: docker
+
+- name: Install Docker components
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+    update_cache: true
+
+- name: Ensure Docker service is running
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Add user to docker group
+  ansible.builtin.user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: true
+
+# --- FIREWALL FIX (ORACLE CLOUD SPECIFIC) ---
+
+- name: Flush existing iptables rules (reset)
+  ansible.builtin.iptables:
+    chain: "{{ item }}"
+    flush: true
+  loop:
+    - INPUT
+    - FORWARD
+    - OUTPUT
+
+- name: Allow SSH (Port 22)
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: 22
+    jump: ACCEPT
+
+- name: Allow HTTP (Port 80)
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: 80
+    jump: ACCEPT
+
+- name: Allow HTTPS (Port 443)
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: 443
+    jump: ACCEPT
+
+- name: Allow Loopback traffic
+  ansible.builtin.iptables:
+    chain: INPUT
+    in_interface: lo
+    jump: ACCEPT
+
+- name: Allow related and established connections
+  ansible.builtin.iptables:
+    chain: INPUT
+    ctstate: ESTABLISHED,RELATED
+    jump: ACCEPT
+
+- name: Set default policy to INPUT DROP (Security)
+  ansible.builtin.iptables:
+    chain: INPUT
+    policy: DROP
+
+- name: Save iptables rules to be persistent across reboots
+  ansible.builtin.command: netfilter-persistent save
+  changed_when: false
