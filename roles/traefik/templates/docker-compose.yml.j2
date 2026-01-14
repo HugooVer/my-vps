@@ -1,0 +1,39 @@
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    restart: unless-stopped
+    
+    ports:
+      - "80:80"
+      - "443:443"
+    
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./acme.json:/acme.json"
+
+    command:
+      # --- Global Settings ---
+      - "--api.insecure=false"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false" 
+      
+      # --- Entrypoints (Listening Ports) ---
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+
+      # --- Global HTTP -> HTTPS Redirect ---
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+
+      # --- SSL / Let's Encrypt Configuration ---
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true" # Use TLS Challenge for validation
+      - "--certificatesresolvers.myresolver.acme.email={{ email_contact }}"
+      - "--certificatesresolvers.myresolver.acme.storage=acme.json"
+
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    name: proxy

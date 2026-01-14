@@ -1,0 +1,30 @@
+---
+- name: Create configuration directory for Traefik
+  ansible.builtin.file:
+    path: /opt/traefik
+    state: directory
+    mode: '0755'
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Create empty acme.json for SSL certificates
+  ansible.builtin.file:
+    path: /opt/traefik/acme.json
+    state: touch
+    mode: '0600' # SECURITY CRITICAL: Must be readable ONLY by owner
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Deploy Docker Compose configuration from template
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: /opt/traefik/docker-compose.yml
+    mode: '0644'
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Start Traefik container
+  ansible.builtin.command: docker compose up -d
+  args:
+    chdir: /opt/traefik
+  changed_when: false # We assume it's always running or Docker handles idempotency roughly here
