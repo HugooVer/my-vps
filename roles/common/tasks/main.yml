@@ -74,6 +74,11 @@
 
 # --- FIREWALL FIX (ORACLE CLOUD SPECIFIC) ---
 
+- name: Set default policy to ACCEPT (Avoid SSH lockout during flush)
+  ansible.builtin.iptables:
+    chain: INPUT
+    policy: ACCEPT
+
 - name: Flush existing iptables rules (reset)
   ansible.builtin.iptables:
     chain: "{{ item }}"
