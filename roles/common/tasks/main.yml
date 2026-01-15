@@ -85,7 +85,6 @@
     flush: true
   loop:
     - INPUT
-    - FORWARD
     - OUTPUT
 
 - name: Allow SSH (Port 22)
@@ -129,3 +128,9 @@
 - name: Save iptables rules to be persistent across reboots
   ansible.builtin.command: netfilter-persistent save
   changed_when: false
+
+- name: Restart Docker to regenerate network rules
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+    enabled: true
