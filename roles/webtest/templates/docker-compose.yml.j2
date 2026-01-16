@@ -1,0 +1,14 @@
+services:
+  webtest:
+    image: nginxdemos/hello
+    restart: unless-stopped
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.webtest.rule=Host(`{{ domain_name }}`)"
+      - "traefik.http.routers.entrypoints=websecure"
+      - "traefik.http.routers.webtest.tls.certresolver=myresolver"
+networks:
+  proxy:
+    external: true
