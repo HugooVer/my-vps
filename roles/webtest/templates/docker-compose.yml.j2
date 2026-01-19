@@ -6,7 +6,9 @@ services:
       - proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.webtest.rule=Host(`{{ domain_name }}`)"
+
+      - "traefik.http.routers.webtest.rule=Host(`test.{{ domain_name }}`)"
+
       - "traefik.http.routers.entrypoints=websecure"
       - "traefik.http.routers.webtest.tls.certresolver=myresolver"
 networks:
