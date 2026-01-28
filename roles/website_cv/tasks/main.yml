@@ -1,0 +1,44 @@
+---
+
+- name: Create application directory
+  ansible.builtin.file:
+    path: /opt/website_cv
+    state: directory
+    mode: '0755'
+
+- name: Deploy Docker Compose template
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: /opt/website_cv/docker-compose.yml
+    mode: '0644'
+
+- name: Deploy config template
+  ansible.builtin.template:
+    src: my_nginx.conf.j2
+    dest: /opt/website_cv/config
+    mode: '0644'
+
+- name: Create html directory
+  ansible.builtin.file:
+    path: /opt/website_cv/html
+    state: directory
+    mode: '0755'
+
+- name: Create test file
+  ansible.builtin.shell:
+    echo "<!doctype html>
+          <html>
+            <head>
+              <title>This is the title of the webpage!</title>
+            </head>
+            <body>
+              <p>This is an example paragraph.</p>
+            </body>
+          </html>" > /opt/website_cv/html/cv.html
+
+- name: Start the CV application
+  community.docker.docker_compose_v2:
+    project_src: /opt/website_cv
+    state: present
+    pull: always
+
