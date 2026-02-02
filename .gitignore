@@ -2,6 +2,7 @@
 vars.yml
 *.env
 .env
+inventory.ini
 
 # Temporary Ansible files
 *.retry
