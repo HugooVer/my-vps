@@ -24,21 +24,8 @@
     state: directory
     mode: '0755'
 
-- name: Create test file
-  ansible.builtin.shell:
-    echo "<!doctype html>
-          <html>
-            <head>
-              <title>This is the title of the webpage!</title>
-            </head>
-            <body>
-              <p>This is an example paragraph.</p>
-            </body>
-          </html>" > /opt/website_cv/html/cv.html
-
 - name: Start the CV application
   community.docker.docker_compose_v2:
     project_src: /opt/website_cv
     state: present
     pull: always
-
