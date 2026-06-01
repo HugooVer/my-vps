@@ -10,7 +10,7 @@ services:
     labels:
       - "traefik.enable=true"
 
-      - "traefik.http.routers.website_cv.rule=Host(`cv.{{ domain_name }}`)"
+      - "traefik.http.routers.website_cv.rule=Host(`cv.{{ domain_name }}`) || Host(`{{ domain_name }}`)"
 
       - "traefik.http.routers.entrypoints=websecure"
       - "traefik.http.routers.website_cv.tls.certresolver=myresolver"
