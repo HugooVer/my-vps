@@ -6,8 +6,8 @@
     upgrade: dist
   register: common_apt_result
   until: common_apt_result is success
-  retries: 10
-  delay: 30
+  retries: 3
+  delay: 60
 
 - name: Install essential packages
   ansible.builtin.apt:
